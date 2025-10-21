@@ -18,7 +18,7 @@ jobs:
       ANNOUNCE_CHANNEL_ID: ${{ secrets.ANNOUNCE_CHANNEL_ID }}
 
       SSH_USER: "ubuntu"
-      SSH_HOST: "18.118.82.154"
+      SSH_HOST: "18.191.251.193"
       TARGET_DIR: "/home/ubuntu/AKATUSKI_BOT"
 
     steps:
