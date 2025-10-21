@@ -1,0 +1,78 @@
+name: Deploy Discord Bot to AWS EC2
+
+on:
+  push:
+    branches:
+      - environment/prod
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      GUILD_ID: ${{ secrets.GUILD_ID }}
+      CR_SORTEO_CHANNEL: ${{ secrets.CR_SORTEO_CHANNEL }}
+      ANNOUNCE_CHANNEL_ID: ${{ secrets.ANNOUNCE_CHANNEL_ID }}
+
+      SSH_USER: "ubuntu"
+      SSH_HOST: "18.118.82.154"
+      TARGET_DIR: "/home/ubuntu/AKATUSKI_BOT"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 1. Setup SSH and Pull Latest Code
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 2. SSH - Pull Code
+        run: |
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
+            cd ${{ env.TARGET_DIR }}
+            echo 'Iniciando Git Pull...'
+            git pull origin main
+            echo 'Código actualizado con éxito.'
+          "
+
+      - name: 3. SSH - Install Dependencies (pnpm)
+        run: |
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
+            cd ${{ env.TARGET_DIR }}
+            echo 'Instalando dependencias con pnpm...'
+            pnpm install
+            echo 'Dependencias instaladas con éxito.'
+          "
+
+      - name: 4. SSH - Build TypeScript (pnpm run build)
+        run: |
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
+            cd ${{ env.TARGET_DIR }}
+            echo 'Compilando TypeScript...'
+            pnpm run build
+            echo 'Compilación (Build) exitosa.'
+          "
+
+      - name: 5. SSH - Restart Discord Bot (tmux)
+        run: |
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
+            cd ${{ env.TARGET_DIR }}
+            echo 'Inyectando variables de entorno y reiniciando bot...'
+          
+            # Exporta todas las variables de entorno para la sesión de tmux/node
+            export DISCORD_TOKEN='${{ env.DISCORD_TOKEN }}'
+            export CLIENT_ID='${{ env.CLIENT_ID }}'
+            export GUILD_ID='${{ env.GUILD_ID }}'
+            export CR_SORTEO_CHANNEL='${{ env.CR_SORTEO_CHANNEL }}'
+            export ANNOUNCE_CHANNEL_ID='${{ env.ANNOUNCE_CHANNEL_ID }}'
+          
+            # Matar y recrear la sesión de tmux (node dist/index.js)
+            tmux kill-session -t discordbot || true
+            tmux new-session -d -s discordbot \"node dist/index.js\"
+          
+            echo 'Bot reiniciado con éxito. Revisa el log con: tmux a -t discordbot'
+          "
