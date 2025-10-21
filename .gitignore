@@ -1,0 +1,27 @@
+# Archivos y directorios generados por Node y gestores de paquetes
+
+# Dependencias (pnpm)
+/node_modules
+/.pnpm-store
+
+# Distribución y compilación
+/dist
+/build
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Archivos temporales de TypeScript y IDE
+*.tsbuildinfo
+.vscode/
+.idea/
+
+.env
+
+# Archivos de SO
+.DS_Store
+Thumbs.db
+
