@@ -35,7 +35,7 @@ jobs:
           ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
             cd ${{ env.TARGET_DIR }}
             echo 'Iniciando Git Pull...'
-            git pull origin main
+            git pull origin environment/prod
             echo 'Código actualizado con éxito.'
           "
 
