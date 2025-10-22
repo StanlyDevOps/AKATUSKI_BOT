@@ -80,14 +80,12 @@ jobs:
       - name: 6. SSH - Restart Discord Bot (tmux)
         run: |
           ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
-            cd ${{ env.TARGET_DIR }}
-            echo 'Reiniciando bot con variables del .env...'
+          cd ${{ env.TARGET_DIR }}
+          echo 'Reiniciando bot con variables de entorno del archivo .env...'
 
-            # Matar la sesión anterior si existe
-            tmux kill-session -t discordbot || true
+          tmux kill-session -t discordbot || true
+          tmux new-session -d -s discordbot 'set -a; source .env; pnpm run start'
 
-            # Iniciar una nueva sesión con las variables del .env
-            tmux new-session -d -s discordbot 'export $(grep -v "^#" .env | xargs) && pnpm run start >> bot.log 2>&1'
-
-            echo 'Bot reiniciado con éxito. Revisa logs con: tmux a -t discordbot'
+          echo 'Bot reiniciado con éxito. Ver logs con: tmux a -t discordbot'
           "
+        
