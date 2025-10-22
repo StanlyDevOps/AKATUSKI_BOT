@@ -34,7 +34,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
-          
+
       - name: 2. SSH - Pull Code
         run: |
           ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
@@ -62,22 +62,30 @@ jobs:
             echo 'Compilación (Build) exitosa.'
           "
 
-      - name: 5. SSH - Restart Discord Bot (tmux)
+      - name: 5. SSH - Update environment variables file
         run: |
           ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
             cd ${{ env.TARGET_DIR }}
-            echo 'Inyectando variables de entorno y reiniciando bot...'
-          
-            # Exporta todas las variables de entorno para la sesión de tmux/node
-            export DISCORD_TOKEN='${{ env.DISCORD_TOKEN }}'
-            export CLIENT_ID='${{ env.CLIENT_ID }}'
-            export GUILD_ID='${{ env.GUILD_ID }}'
-            export CR_SORTEO_CHANNEL='${{ env.CR_SORTEO_CHANNEL }}'
-            export ANNOUNCE_CHANNEL_ID='${{ env.ANNOUNCE_CHANNEL_ID }}'
-          
-            # Matar y recrear la sesión de tmux (node dist/index.js)
+            echo 'Actualizando archivo .env...'
+            cat > .env <<EOL
+              DISCORD_TOKEN=${{ env.DISCORD_TOKEN }}
+              CLIENT_ID=${{ env.CLIENT_ID }}
+              GUILD_ID=${{ env.GUILD_ID }}
+              CR_SORTEO_CHANNEL=${{ env.CR_SORTEO_CHANNEL }}
+              ANNOUNCE_CHANNEL_ID=${{ env.ANNOUNCE_CHANNEL_ID }}
+              EOL
+            echo '.env actualizado con éxito.'
+          "
+
+      - name: 6. SSH - Restart Discord Bot (tmux)
+        run: |
+          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
+            cd ${{ env.TARGET_DIR }}
+            echo 'Reiniciando bot con variables desde .env...'
+      
             tmux kill-session -t discordbot || true
-            tmux new-session -d -s discordbot \"node dist/index.js\"
-          
+
+            tmux new-session -d -s discordbot 'export $(grep -v "^#" .env | xargs) && pnpm run start >> bot.log 2>&1'
+
             echo 'Bot reiniciado con éxito. Revisa el log con: tmux a -t discordbot'
           "
