@@ -30,6 +30,11 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Add EC2 host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
+          
       - name: 2. SSH - Pull Code
         run: |
           ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
