@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, PermissionFlagsBits, TextChannel } from 'discord.js';
-import { buildSorteoEmbed } from 'utils/embed-sorteo';
+import { buildSorteoEmbed } from '@utils/embed-sorteo.js';
 
 const ANNOUNCE_CHANNEL_ID = process.env.ANNOUNCE_CHANNEL_ID;
 const ANNOUNCE_ROLE_ID = process.env.ANNOUNCE_ROLE_ID;

@@ -1,8 +1,8 @@
 import 'dotenv/config';
 
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
-import { loadCommands } from '@handlers/command-handler';
-import { registerCommands } from 'register-commands';
+import { loadCommands } from '@handlers/command-handler.js';
+import { registerCommands } from 'register-commands.js';
 
 const TOKEN = process.env.DISCORD_TOKEN!;
 const CLIENT_ID = process.env.CLIENT_ID!;
