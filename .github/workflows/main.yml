@@ -62,18 +62,18 @@ jobs:
             echo 'Compilación (Build) exitosa.'
           "
 
-      - name: 5. SSH - Update environment variables file
+      - name: 5. SSH - Update .env file
         run: |
           ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
             cd ${{ env.TARGET_DIR }}
             echo 'Actualizando archivo .env...'
-            cat > .env <<EOL
-              DISCORD_TOKEN=${{ env.DISCORD_TOKEN }}
-              CLIENT_ID=${{ env.CLIENT_ID }}
-              GUILD_ID=${{ env.GUILD_ID }}
-              CR_SORTEO_CHANNEL=${{ env.CR_SORTEO_CHANNEL }}
-              ANNOUNCE_CHANNEL_ID=${{ env.ANNOUNCE_CHANNEL_ID }}
-              EOL
+            cat > .env <<EOF
+DISCORD_TOKEN=${{ env.DISCORD_TOKEN }}
+CLIENT_ID=${{ env.CLIENT_ID }}
+GUILD_ID=${{ env.GUILD_ID }}
+CR_SORTEO_CHANNEL=${{ env.CR_SORTEO_CHANNEL }}
+ANNOUNCE_CHANNEL_ID=${{ env.ANNOUNCE_CHANNEL_ID }}
+EOF
             echo '.env actualizado con éxito.'
           "
 
@@ -81,11 +81,13 @@ jobs:
         run: |
           ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "
             cd ${{ env.TARGET_DIR }}
-            echo 'Reiniciando bot con variables desde .env...'
-      
+            echo 'Reiniciando bot con variables del .env...'
+
+            # Matar la sesión anterior si existe
             tmux kill-session -t discordbot || true
 
+            # Iniciar una nueva sesión con las variables del .env
             tmux new-session -d -s discordbot 'export $(grep -v "^#" .env | xargs) && pnpm run start >> bot.log 2>&1'
 
-            echo 'Bot reiniciado con éxito. Revisa el log con: tmux a -t discordbot'
+            echo 'Bot reiniciado con éxito. Revisa logs con: tmux a -t discordbot'
           "
