@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { buildSorteoEmbed } from 'utils/embed-sorteo';
+import { buildSorteoEmbed } from '@utils/embed-sorteo.js';
 
 export const command = {
     data: new SlashCommandBuilder()
