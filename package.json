@@ -1,6 +1,7 @@
 {
   "name": "akatuski_bot",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
