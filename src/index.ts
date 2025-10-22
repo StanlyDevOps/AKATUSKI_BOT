@@ -19,7 +19,7 @@ declare module 'discord.js' {
 }
 
 const main = async () => {
-    loadCommands(client);
+    await loadCommands(client);
 
     await registerCommands(client, CLIENT_ID, GUILD_ID);
 }

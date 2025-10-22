@@ -3,18 +3,22 @@ import path from 'path';
 import { Client, Collection } from 'discord.js';
 
 /**
- * Carga automáticamente todos los comandos desde src/commands/
+ * Carga automáticamente todos los comandos desde src/commands o dist/commands
+ * según el entorno.
  */
-export const loadCommands = (client: Client) => { // Función ahora síncrona
+export const loadCommands = async (client: Client) => {
     const commands = new Collection<string, any>();
-    const commandsPath = path.resolve('src/commands');
 
+    const isDev = process.env.NODE_ENV !== 'production';
+    const baseDir = isDev ? 'src/commands' : 'dist/commands';
+
+    const commandsPath = path.resolve(baseDir);
     const files = fs.readdirSync(commandsPath).filter(f => f.endsWith('.ts') || f.endsWith('.js'));
 
     for (const file of files) {
         const filePath = path.join(commandsPath, file);
-
-        const { command } = require(filePath);
+        
+        const { command } = await import(`file://${path.resolve(filePath)}`);
 
         if (command?.data && command?.execute) {
             commands.set(command.data.name, command);
@@ -25,6 +29,5 @@ export const loadCommands = (client: Client) => { // Función ahora síncrona
     }
 
     (client as any).commands = commands;
-
     console.log(`${commands.size} comandos cargados correctamente`);
-}
+};
